@@ -1,0 +1,16 @@
+{
+  "name": "My Awesome Token",
+  "symbol": "MAT",
+  "description": "A sample token created on Solana testnet",
+  "decimals": 6,
+  "initialSupply": 1000000,
+  "network": "testnet",
+  "mintAddress": "GhwmuvByp2WMDypvxBE8ZBVNiUiT43Zb6FvMABC3Lwgh",
+  "tokenAccountAddress": "GpTV2TLPmo8F1BwRReJvVaEJZsdC1YcBLK7ziW9Kxm78",
+  "totalSupply": "1000000000000",
+  "balance": "1000000000000",
+  "mintAuthority": "Hbj32hSLmyHVuRWVaa58KdeDK9D7jt1Dw5M3rPWGtZZN",
+  "freezeAuthority": "Hbj32hSLmyHVuRWVaa58KdeDK9D7jt1Dw5M3rPWGtZZN",
+  "walletAddress": "Hbj32hSLmyHVuRWVaa58KdeDK9D7jt1Dw5M3rPWGtZZN",
+  "createdAt": "2025-06-20T05:50:20.292Z"
+}
