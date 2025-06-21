@@ -1,0 +1,12 @@
+{
+  "programId": "RoQZsTPSQyMVeMfWR2NxCaJD1ui781GE77JJtoz2dw8",
+  "tokenMint": "GhwmuvByp2WMDypvxBE8ZBVNiUiT43Zb6FvMABC3Lwgh",
+  "vaultPDA": "7WvJdEAcaMF2CpQKMsDEP1ETP7P1UTwqSPKDgQoAKWwX",
+  "vaultAuthorityPDA": "7WvJdEAcaMF2CpQKMsDEP1ETP7P1UTwqSPKDgQoAKWwX",
+  "vaultTokenAccount": "Cy3koXBfRU7ZXJXt8cebDQLsYf8N5LKhzoNoWPrkbMcc",
+  "vaultBump": 254,
+  "vaultAuthorityBump": 254,
+  "amount": 1000000000000,
+  "network": "testnet",
+  "setupAt": "2025-06-21T03:57:29.172Z"
+}

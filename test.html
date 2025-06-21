@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Airdrop - Claim Your Free Tokens!</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.9.0/web3.min.js"></script>
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script src="https://unpkg.com/@solana/spl-token@latest/lib/index.iife.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        .token-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .token-amount {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #feca57;
+            margin: 10px 0;
+        }
+
+        .wallet-status {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            border: none;
+            border-radius: 50px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            min-width: 200px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn.loading {
+            color: transparent;
+        }
+
+        .btn.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .success {
+            background: linear-gradient(45deg, #2ed573, #1e90ff);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .error {
+            background: linear-gradient(45deg, #ff4757, #ff3838);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .transaction-link {
+            color: #feca57;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .transaction-link:hover {
+            text-decoration: underline;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .countdown {
+            font-size: 1.5rem;
+            color: #feca57;
+            margin: 15px 0;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .token-amount {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🚀</div>
+        <h1>Token Airdrop</h1>
+        <p class="subtitle">Claim your free tokens now!</p>
+
+        <div class="token-info">
+            <h3>Free Token Amount</h3>
+            <div class="token-amount">1.0</div>
+            <p>MAT Tokens</p>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <div>Instant</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔒</div>
+                <div>Secure</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🆓</div>
+                <div>Free</div>
+            </div>
+        </div>
+
+        <div class="wallet-status" id="walletStatus">
+            <p>🔌 Please connect your Solana wallet to continue</p>
+        </div>
+
+        <button class="btn" id="connectBtn" onclick="connectWallet()">
+            Connect Wallet
+        </button>
+
+        <button class="btn" id="claimBtn" onclick="claimAirdrop()" style="display: none;" disabled>
+            🎁 Claim Airdrop
+        </button>
+
+        <div class="success" id="successMessage">
+            <h3>🎉 Airdrop Successful!</h3>
+            <p>1 MAT token has been sent to your wallet!</p>
+            <p>Transaction: <a href="#" id="transactionLink" class="transaction-link" target="_blank">View on Explorer</a></p>
+        </div>
+
+        <div class="error" id="errorMessage">
+            <h3>❌ Error</h3>
+            <p id="errorText">Something went wrong. Please try again.</p>
+        </div>
+
+        <div style="margin-top: 30px; font-size: 0.9rem; opacity: 0.8;">
+            <p>⚠️ This is running on Solana Testnet</p>
+            <p>Testnet tokens have no real value</p>
+        </div>
+    </div>
+
+    <script>
+        // Configuration - UPDATE THESE WITH YOUR TOKEN INFO
+        const CONFIG = {
+            network: 'testnet',
+            rpcUrl: 'https://api.testnet.solana.com',
+            backendUrl: 'http://localhost:3001', // Your backend server URL
+            mintAddress: 'YOUR_TOKEN_MINT_ADDRESS
+
+        // Global variables
+        let connection;
+        let wallet = null;
+        let userTokenAccount = null;
+
+        // Initialize Solana connection
+        async function initializeSolana() {
+            try {
+                connection = new solanaWeb3.Connection(CONFIG.rpcUrl, 'confirmed');
+                console.log('Connected to Solana network');
+            } catch (error) {
+                console.error('Failed to connect to Solana:', error);
+                showError('Failed to connect to Solana network');
+            }
+        }
+
+        // Connect wallet (Phantom/Solflare)
+        async function connectWallet() {
+            const connectBtn = document.getElementById('connectBtn');
+            connectBtn.classList.add('loading');
+            connectBtn.disabled = true;
+
+            try {
+                // Check if wallet is available
+                if (window.solana && window.solana.isPhantom) {
+                    console.log('Phantom wallet detected');
+                    
+                    // Connect to wallet
+                    const response = await window.solana.connect();
+                    wallet = {
+                        publicKey: response.publicKey,
+                        signTransaction: window.solana.signTransaction,
+                        signAllTransactions: window.solana.signAllTransactions
+                    };
+
+                    console.log('Wallet connected:', wallet.publicKey.toString());
+                    await updateWalletStatus();
+                    
+                } else {
+                    throw new Error('Phantom wallet not detected. Please install Phantom wallet.');
+                }
+            } catch (error) {
+                console.error('Wallet connection failed:', error);
+                showError(error.message || 'Failed to connect wallet');
+            } finally {
+                connectBtn.classList.remove('loading');
+                connectBtn.disabled = false;
+            }
+        }
+
+        // Update wallet status display
+        async function updateWalletStatus() {
+            const walletStatus = document.getElementById('walletStatus');
+            const connectBtn = document.getElementById('connectBtn');
+            const claimBtn = document.getElementById('claimBtn');
+
+            if (wallet) {
+                const address = wallet.publicKey.toString();
+                const shortAddress = `${address.slice(0, 4)}...${address.slice(-4)}`;
+                
+                // Get SOL balance
+                try {
+                    const balance = await connection.getBalance(wallet.publicKey);
+                    const solBalance = (balance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(4);
+                    
+                    walletStatus.innerHTML = `
+                        <p>✅ Wallet Connected: ${shortAddress}</p>
+                        <p>💰 Balance: ${solBalance} SOL</p>
+                    `;
+                    
+                    connectBtn.style.display = 'none';
+                    claimBtn.style.display = 'inline-block';
+                    claimBtn.disabled = false;
+                    
+                    // Check if user already has tokens
+                    await checkExistingTokens();
+                    
+                } catch (error) {
+                    console.error('Error getting wallet balance:', error);
+                    walletStatus.innerHTML = `
+                        <p>✅ Wallet Connected: ${shortAddress}</p>
+                        <p>⚠️ Could not fetch balance</p>
+                    `;
+                }
+            }
+        }
+
+        // Check if user already has tokens
+        async function checkExistingTokens() {
+            if (!CONFIG.mintAddress || CONFIG.mintAddress === 'YOUR_TOKEN_MINT_ADDRESS_HERE') {
+                document.getElementById('claimBtn').innerHTML = '⚠️ Configure Token Address';
+                document.getElementById('claimBtn').disabled = true;
+                showError('Please configure your token mint address in the code');
+                return;
+            }
+
+            try {
+                // This is a placeholder - in a real app, you'd check the user's token balance
+                // and prevent multiple airdrops per wallet
+                console.log('Checking existing tokens...');
+            } catch (error) {
+                console.error('Error checking tokens:', error);
+            }
+        }
+
+        // Main airdrop function
+        async function claimAirdrop() {
+            const claimBtn = document.getElementById('claimBtn');
+            
+            // Show confirmation dialog
+            const confirmed = confirm(`
+🎁 Confirm Airdrop Claim
+
+You will receive: ${CONFIG.airdropAmount} ${CONFIG.tokenSymbol}
+Network: Solana ${CONFIG.network}
+
+Click OK to proceed with the airdrop.
+            `);
+            
+            if (!confirmed) {
+                return;
+            }
+
+            claimBtn.classList.add('loading');
+            claimBtn.disabled = true;
+            hideMessages();
+
+            try {
+                // Validate configuration
+                if (!CONFIG.mintAddress || CONFIG.mintAddress === 'YOUR_TOKEN_MINT_ADDRESS_HERE') {
+                    throw new Error('Token mint address not configured');
+                }
+
+                console.log('Starting airdrop process...');
+                
+                // Create mint public key
+                const mintPublicKey = new solanaWeb3.PublicKey(CONFIG.mintAddress);
+                
+                // Get or create user's token account
+                const userTokenAccount = await splToken.getOrCreateAssociatedTokenAccount(
+                    connection,
+                    wallet, // This would need to be a proper payer keypair in real implementation
+                    mintPublicKey,
+                    wallet.publicKey
+                );
+
+                console.log('User token account:', userTokenAccount.address.toString());
+
+                // Calculate mint amount (with decimals)
+                const mintAmount = CONFIG.airdropAmount * Math.pow(10, CONFIG.tokenDecimals);
+
+                // In a real implementation, this would be done by a backend service
+                // that has the mint authority. For demo purposes, we'll show the process:
+                
+                // IMPORTANT: This is just a frontend demo
+                // In production, you need a backend service with mint authority
+                console.log('Minting tokens to user account...');
+                
+                // Simulate successful transaction
+                await simulateAirdrop();
+                
+            } catch (error) {
+                console.error('Airdrop failed:', error);
+                showError(error.message || 'Airdrop failed. Please try again.');
+            } finally {
+                claimBtn.classList.remove('loading');
+                claimBtn.disabled = false;
+            }
+        }
+
+        // Simulate airdrop success (replace with real implementation)
+        async function simulateAirdrop() {
+            // Simulate network delay
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            
+            // Show success message
+            const successDiv = document.getElementById('successMessage');
+            const transactionLink = document.getElementById('transactionLink');
+            
+            // Generate a fake transaction signature for demo
+            const fakeSignature = 'demo_transaction_' + Math.random().toString(36).substring(7);
+            const explorerUrl = `https://explorer.solana.com/tx/${fakeSignature}?cluster=${CONFIG.network}`;
+            
+            transactionLink.href = explorerUrl;
+            transactionLink.textContent = fakeSignature.substring(0, 20) + '...';
+            
+            successDiv.style.display = 'block';
+            
+            // Hide claim button and show claimed status
+            document.getElementById('claimBtn').innerHTML = '✅ Already Claimed';
+            document.getElementById('claimBtn').disabled = true;
+            
+            console.log('Airdrop simulation completed');
+        }
+
+        // Utility functions
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideMessages() {
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', async () => {
+            await initializeSolana();
+            
+            // Check if wallet is already connected
+            if (window.solana && window.solana.isConnected) {
+                try {
+                    wallet = {
+                        publicKey: window.solana.publicKey,
+                        signTransaction: window.solana.signTransaction,
+                        signAllTransactions: window.solana.signAllTransactions
+                    };
+                    await updateWalletStatus();
+                } catch (error) {
+                    console.error('Error checking existing wallet connection:', error);
+                }
+            }
+        });
+
+        // Handle wallet disconnect
+        if (window.solana) {
+            window.solana.on('disconnect', () => {
+                wallet = null;
+                document.getElementById('walletStatus').innerHTML = '<p>🔌 Please connect your Solana wallet to continue</p>';
+                document.getElementById('connectBtn').style.display = 'inline-block';
+                document.getElementById('claimBtn').style.display = 'none';
+                hideMessages();
+            });
+        }
+    </script>
+</body>
+</html>
